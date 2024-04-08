@@ -5,7 +5,7 @@ import * as net from "node:net";
 
 function serverListener(connection: net.Socket) {
     connection.on("data", function onConnection(data: Buffer) {
-      data ? connection.write(data) : connection.write("+PONG\r\n");
+      connection.write("+PONG\r\n");
     });
 }
 
