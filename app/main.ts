@@ -4,7 +4,10 @@ import * as net from "node:net";
 // console.log("Logs from your program will appear here!");
 
 function serverListener(connection: net.Socket) {
+    // connection is a Socket object that can be used to read and write data from the client
+    // connection.on is used to register a callback that will be called when data is received from the client
     connection.on("data", function onConnection(data: Buffer) {
+      // connection.write is used to write data to the client
       connection.write("+PONG\r\n");
     });
 }
