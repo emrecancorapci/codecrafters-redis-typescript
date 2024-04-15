@@ -1,4 +1,5 @@
 import * as net from 'node:net';
+import { argv } from 'node:process';
 
 import RESPV2Parser from './resp-v2-parser.ts';
 import RESPV2Serializer from './resp-v2-serializer.ts';
@@ -33,9 +34,11 @@ function serverListener(socket: net.Socket) {
   });
 }
 
+const PORT = Number(argv[argv.findIndex((value) => value.toLowerCase() == '--port') + 1]) || 6379;
+
 const server: net.Server = net
   .createServer(serverListener)
   .on('connection', (socket) => console.log(`New connection from`, socket.remoteAddress, socket.remotePort))
   .on('error', (error) => console.error(error));
 
-server.listen(6379, '127.0.0.1');
+server.listen(PORT, '127.0.0.1').on('listening', () => console.log(`Server listening on port ${PORT}`));
