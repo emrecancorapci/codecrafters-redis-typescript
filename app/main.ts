@@ -1,6 +1,6 @@
 import * as net from 'node:net';
 
-import { parseRespV2 } from './resp-v2-parser.ts';
+import RESPV2Parser from './resp-v2-parser.ts';
 import { serializeError } from './resp-v2-serializer.ts';
 import ServerHandler from './server-handler.ts';
 import { DatabaseValue } from './types.ts';
@@ -18,7 +18,7 @@ function serverListener(socket: net.Socket) {
   const serverHandler = new ServerHandler({ database, socketWrite });
   socket.on('data', function socketOn(buffer: Buffer) {
     try {
-      const parsedBuffer = parseRespV2(buffer.toString());
+      const parsedBuffer = RESPV2Parser.parse(buffer.toString());
 
       if (parsedBuffer === undefined) {
         const error = serializeError('Parser returns nothing. Please provide a valid RESPv2 data.');
