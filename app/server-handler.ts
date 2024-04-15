@@ -25,11 +25,12 @@ export default function ServerHandler({
   };
 
   const set: ServerAction = (data: DataType[]) => {
-    if (data.length < 2) return sendError('Invalid number of arguments to set command');
+    if (data.length < 2) return sendError('Not enough number of ARGUMENTs for SET. Data: ' + data.join(' '));
     const [key, value, ...setArguments] = data;
 
-    if (typeof key !== 'string') return sendError('Invalid key argument');
-    if (typeof value !== 'string' && typeof value !== 'number') return sendError('Invalid value argument');
+    if (typeof key !== 'string') return sendError('Invalid KEY for SET. Key: ' + key);
+    if (typeof value !== 'string' && typeof value !== 'number')
+      return sendError('Invalid VALUE for SET. Value: ' + value);
 
     if (data.length === 2) {
       database.set(key, { value, expires: -1 });
@@ -39,21 +40,23 @@ export default function ServerHandler({
     if (data.length === 4) {
       const [argument, argumentValue] = setArguments;
 
-      if (typeof argument !== 'string') return sendError('Invalid set argument');
+      if (typeof argument !== 'string') return sendError('Invalid ARGUMENT type for SET. Argument: ' + argument);
       if (argument.toLowerCase() === 'px' && typeof argumentValue === 'number' && argumentValue > 0) {
         database.set(key, { value, expires: Date.now() + argumentValue });
         return socketWrite('+OK\r\n');
+      } else {
+        return sendError('Invalid ARGUMENT pair for SET. Argument: ' + argument + ' Value: ' + argumentValue);
       }
     }
 
-    return sendError('Invalid number of arguments to set command');
+    return sendError('Invalid number of ARGUMENTs for SET. Data: ' + data.join(' '));
   };
 
   const get: ServerAction = (data: DataType[]) => {
-    if (data.length !== 1) return sendError('Invalid number of arguments to get command');
+    if (data.length !== 1) return sendError('Invalid number of ARGUMENTs for GET. Data: ' + data.join(' '));
 
     const key = data[0];
-    if (typeof key !== 'string') return sendError('Invalid key argument');
+    if (typeof key !== 'string') return sendError('Invalid KEY for GET. Key: ' + key);
 
     const databaseValue = database.get(key);
     if (databaseValue === undefined) return socketWrite('$-1\r\n');
