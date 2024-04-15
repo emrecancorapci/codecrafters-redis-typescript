@@ -1,18 +1,41 @@
 import * as net from "node:net";
+import { respV2ErrorUnparser, respV2Parser, respV2Unparser } from "./resp-v2-parser";
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-// console.log("Logs from your program will appear here!");
-
-async function serverListener(connection: net.Socket) {
-    // connection is a Socket object that can be used to read and write data from the client
-    // connection.on is used to register a callback that will be called when data is received from the client
-    connection.on("data", async function onConnection(data: Buffer) {
-      // connection.write is used to write data to the client
-      connection.write("+PONG\r\n");
-    });
+async function serverListener(socket: net.Socket) {
+  socket.on('data', function serverHandler(data: Buffer) {
+    const dataObject = respV2Parser(data.toString());
+    console.log(dataObject)
+  
+    if (dataObject === undefined) {
+      const error = respV2ErrorUnparser("Invalid data");
+      socket.write(error);
+      return;
+    }
+  
+    if (Array.isArray(dataObject)) {
+      switch (dataObject[0]) {
+        case 'ping':
+          dataObject.forEach((object) => {
+            if (typeof object === 'string' && object.toLowerCase() === 'ping') socket.write('+PONG\r\n');
+          })
+          break;
+        case 'echo':
+          const response = respV2Unparser(dataObject.slice(1));
+          console.log(response);
+          socket.write(response);
+          break;
+        default:
+          socket.write(respV2ErrorUnparser("Invalid operation"));
+      }
+    }
+  });
 }
 
-const server: net.Server = net.createServer(serverListener);
 
-server.listen(6379, "127.0.0.1");   
+
+const server: net.Server = net.createServer(serverListener).on('connection', socket =>
+  console.log(`new connection from`, socket.remoteAddress, socket.remotePort
+  )).on('error', err => console.error(err)).on('close', () => console.log('server closed'));
+
+server.listen(6379, "127.0.0.1");
 
