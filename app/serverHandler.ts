@@ -46,10 +46,10 @@ export default function ServerHandler({ database, socketWrite }: { database: Map
 
   const runServerCommand = (command: string, data: DataType[]) => {
     switch (command.toLowerCase()) {
-      case 'ping': ping(data);
-      case 'echo': echo(data);
-      case 'set': set(data);
-      case 'get': get(data);
+      case 'ping': ping(data); break;
+      case 'echo': echo(data); break;
+      case 'set': set(data); break;
+      case 'get': get(data); break;
       default: sendError("Unknown command");
     }
   }

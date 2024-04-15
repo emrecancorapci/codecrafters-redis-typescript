@@ -34,14 +34,13 @@ async function serverListener(socket: net.Socket) {
       const [operation, ...data] = parsedBuffer;
 
       if(typeof operation !== 'string') {
-        sendError("Invalid command");
-        return;
+        sendError("Invalid command. Command should be a string.");
+      } else {
+        runServerCommand(operation, data);
       }
-      runServerCommand(operation, data);
     } catch (error) {
       console.error(error);
       sendError("ERROR: " + error.message);
-
     }
   });
 }
