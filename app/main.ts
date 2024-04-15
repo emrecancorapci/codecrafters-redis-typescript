@@ -15,8 +15,8 @@ function serverListener(socket: net.Socket) {
     socket.write(data);
   };
 
-  const runServerCommand = ServerHandler({ database, socketWrite });
-  socket.on('data', function serverHandler(buffer: Buffer) {
+  const serverHandler = new ServerHandler({ database, socketWrite });
+  socket.on('data', function socketOn(buffer: Buffer) {
     try {
       const parsedBuffer = parseRespV2(buffer.toString());
 
@@ -35,7 +35,7 @@ function serverListener(socket: net.Socket) {
       const [operation, ...data] = parsedBuffer;
 
       if (typeof operation === 'string') {
-        runServerCommand(operation, data);
+        serverHandler.run(operation, data);
       } else {
         sendError('Command should be a string.');
       }
