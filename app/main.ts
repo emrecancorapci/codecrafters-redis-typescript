@@ -1,5 +1,5 @@
 import * as net from "node:net";
-import { respV2ErrorUnparser, respV2Parser, respV2Unparser } from "./resp-v2-parser";
+import { respV2ErrorUnparser, respV2Parser, respV2Unparser } from "./resp-v2-parser.ts";
 
 async function serverListener(socket: net.Socket) {
   socket.on('data', function serverHandler(data: Buffer) {
