@@ -35,7 +35,7 @@ async function serverListener(socket: net.Socket) {
 
 const server: net.Server = net.createServer(serverListener).on('connection', socket =>
   console.log(`new connection from`, socket.remoteAddress, socket.remotePort
-  )).on('error', err => console.error(err)).on('close', () => console.log('server closed'));
+  )).on('error', err => console.error(err));
 
 server.listen(6379, "127.0.0.1");
 
