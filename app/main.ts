@@ -1,10 +1,12 @@
 import * as net from 'node:net';
-import { argv } from 'node:process';
 
+import getPort from './get-port.ts';
 import RESPV2Parser from './resp-v2-parser.ts';
 import RESPV2Serializer from './resp-v2-serializer.ts';
 import ServerHandler from './server-handler.ts';
 import { DatabaseValue } from './types.ts';
+
+const PORT = getPort();
 
 function serverListener(socket: net.Socket) {
   const database = new Map<string, DatabaseValue>();
@@ -29,7 +31,7 @@ function serverListener(socket: net.Socket) {
       serverHandler.run(operation, data);
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) sendError('ERROR: ' + error.message);
+      if (error instanceof Error) return sendError('ERROR: ' + error.message);
     }
   });
 }
@@ -39,14 +41,4 @@ const server: net.Server = net
   .on('connection', (socket) => console.log(`New connection from`, socket.remoteAddress, socket.remotePort))
   .on('error', (error) => console.error(error));
 
-if (argv.length > 3) {
-  const runArguments = argv.slice(2);
-  const portArgumentIndex = runArguments.findIndex((value) => value.toLowerCase() == '--port');
-  const PORT = portArgumentIndex >= 0 ? Number(runArguments[portArgumentIndex + 1]) : 6379;
-  console.log('Arguments:', runArguments);
-  console.log('Port argument index:', portArgumentIndex);
-  console.log('Port:', PORT);
-  server.listen(PORT, '127.0.0.1').on('listening', () => console.log(`Server listening on port ${PORT}`));
-} else {
-  server.listen(6379, '127.0.0.1');
-}
+server.listen(PORT, '127.0.0.1').on('listening', () => console.log(`Server listening on port ${PORT}`));
