@@ -48,5 +48,5 @@ export const serializeData = (data: DataType | DataType[]) => {
   } else if (Array.isArray(data)) {
     return serializeArray(data);
   }
-  throw new Error('Invalid data.');
+  throw new Error(`Invalid data type to serialize.`);
 };

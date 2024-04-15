@@ -1,9 +1,11 @@
 import { DataType } from './types.ts';
 
 export function parseRespV2(buffer: string): DataType[] | DataType {
-  const data = buffer.toString().trim().split('\\r\\n').slice(0, -1);
+  // const data = buffer.toString().trim().split('\\r\\n').slice(0, -1); // For Development
+  const data = buffer.toString().trim().split('\r\n');
 
-  if (data[0] == undefined || data[0][0] == undefined) throw new Error('Invalid data');
+  if (data[0] == undefined || data[0][0] == undefined)
+    throw new Error(`Invalid data format. Parse request: ${data.join(' ')}`);
 
   const valueOrArrayParser = getValueOrParser(data[0][0]);
 
@@ -55,12 +57,14 @@ function parseInteger(data: string): number {
     throw new Error(`Invalid integer response. Parse request: ${data}`);
   const value = Number.parseInt(data.slice(1));
   if (Number.isInteger(value)) return value;
-  throw new Error('Invalid integer response');
+  throw new Error(`Invalid integer response. Value is not an integer. Parse request: ${data}`);
 }
 
 function parseArray(data: string[]): DataType[] | undefined {
-  if (data[0] == undefined || data[0][0] == undefined) throw new Error('Invalid array response');
-  if (data[0][0] !== '*') throw new Error(`Invalid array response. Parse request: [${data.join(' ')}]`);
+  if (data[0] == undefined || data[0][0] == undefined)
+    throw new Error(`Invalid array response. Operation field is empty. Parse request: [${data.join(' ')}]`);
+  if (data[0][0] !== '*')
+    throw new Error(`Invalid array response. Operation is for an array. Parse request: [${data.join(' ')}]`);
   let result: DataType[] = [];
 
   for (let index = 1; index < data.length; index++) {

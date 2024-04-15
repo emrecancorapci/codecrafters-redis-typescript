@@ -21,13 +21,13 @@ function serverListener(socket: net.Socket) {
       const parsedBuffer = parseRespV2(buffer.toString());
 
       if (parsedBuffer === undefined) {
-        const error = serializeError('Invalid data');
+        const error = serializeError('Parser returns nothing. Please provide a valid RESPv2 data.');
         socket.write(error);
         return;
       }
 
       if (!Array.isArray(parsedBuffer)) {
-        const error = serializeError('Invalid data');
+        const error = serializeError('Invalid data. Please provide a valid RESPv2 array.');
         socket.write(error);
         return;
       }
@@ -37,7 +37,7 @@ function serverListener(socket: net.Socket) {
       if (typeof operation === 'string') {
         runServerCommand(operation, data);
       } else {
-        sendError('Invalid command. Command should be a string.');
+        sendError('Command should be a string.');
       }
     } catch (error) {
       console.error(error);
@@ -48,7 +48,7 @@ function serverListener(socket: net.Socket) {
 
 const server: net.Server = net
   .createServer(serverListener)
-  .on('connection', (socket) => console.log(`new connection from`, socket.remoteAddress, socket.remotePort))
+  .on('connection', (socket) => console.log(`New connection from`, socket.remoteAddress, socket.remotePort))
   .on('error', (error) => console.error(error));
 
 server.listen(6379, '127.0.0.1');
