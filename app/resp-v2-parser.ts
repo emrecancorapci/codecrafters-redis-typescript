@@ -24,7 +24,7 @@ export default class RESPV2Parser {
       case '*': {
         if (data[0].slice(1) === '0') return [];
         else if (data[0].slice(1) === '-1') return undefined;
-        else return RESPV2Parser.parseArray(data.slice(1));
+        else return RESPV2Parser.parseArray(data);
       }
     }
   }
@@ -46,9 +46,9 @@ export default class RESPV2Parser {
 
   private static parseArray(data: string[]): DataType[] | undefined {
     if (data[0] == undefined || data[0][0] == undefined)
-      throw new Error(`Invalid array response. Operation field is empty. Parse request: [${data.join(' ')}]`);
+      throw new Error(`Invalid array response. Operation field is empty. Parse request: [${data.join(', ')}]`);
     if (data[0][0] !== '*')
-      throw new Error(`Invalid array response. Operation is for an array. Parse request: [${data.join(' ')}]`);
+      throw new Error(`Invalid array response. Wrong operation. Parse request: [${data.join(', ')}]`);
     let result: DataType[] = [];
 
     for (let index = 1; index < data.length; index++) {
