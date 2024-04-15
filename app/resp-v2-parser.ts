@@ -1,5 +1,5 @@
 export function respV2Parser(buffer: string): DataType[] | DataType {
-  const data = buffer.toString().trim().split('\r\n').slice(0, -1);
+  const data = buffer.toString().trim().split('\r\n');
   console.log('Parsed data:', data);
   const valueOrArrayParser = getValueOrParser(data[0][0]);
 
