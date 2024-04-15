@@ -2,14 +2,14 @@ import { serializeData, serializeError } from './resp-v2-serializer.ts';
 import { DatabaseValue, DataType } from './types.ts';
 
 type ServerAction = (data: DataType[]) => void;
+type ServerHandler = (command: string, data: DataType[]) => void;
 
-export default function ServerHandler({
-  database,
-  socketWrite,
-}: {
+interface ServerHandlerProperties {
   database: Map<string, DatabaseValue>;
   socketWrite: (data: string) => void;
-}) {
+}
+
+export default function ServerHandler({ database, socketWrite }: ServerHandlerProperties): ServerHandler {
   const sendError = (message: string) => socketWrite(serializeError(message));
 
   const ping: ServerAction = (data: DataType[]) => {
@@ -41,8 +41,12 @@ export default function ServerHandler({
       const [argument, argumentValue] = setArguments;
 
       if (typeof argument !== 'string') return sendError('Invalid ARGUMENT type for SET. Argument: ' + argument);
-      if (argument.toLowerCase() === 'px' && typeof argumentValue === 'number' && argumentValue > 0) {
-        database.set(key, { value, expires: Date.now() + argumentValue });
+      if (argument.toLowerCase() === 'px') {
+        const expires = Number(argumentValue);
+        if (Number.isNaN(expires) || expires < 0)
+          return sendError('Invalid EXPIRES for SET. Expires: ' + argumentValue);
+
+        database.set(key, { value, expires: Date.now() + expires });
         return socketWrite('+OK\r\n');
       } else {
         return sendError('Invalid ARGUMENT pair for SET. Argument: ' + argument + ' Value: ' + argumentValue);
@@ -69,7 +73,7 @@ export default function ServerHandler({
     socketWrite(serializeData(databaseValue.value));
   };
 
-  const runServerCommand = (command: string, data: DataType[]) => {
+  const runServerCommand: ServerHandler = (command: string, data: DataType[]) => {
     switch (command.toLowerCase()) {
       case 'ping': {
         ping(data);
