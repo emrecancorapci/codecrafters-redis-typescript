@@ -1,7 +1,7 @@
 import * as net from 'node:net';
 
 import RESPV2Parser from './resp-v2-parser.ts';
-import { serializeError } from './resp-v2-serializer.ts';
+import RESPV2Serializer from './resp-v2-serializer.ts';
 import ServerHandler from './server-handler.ts';
 import { DatabaseValue } from './types.ts';
 
@@ -9,7 +9,7 @@ function serverListener(socket: net.Socket) {
   const database = new Map<string, DatabaseValue>();
 
   const sendError = (message: string) => {
-    socket.write(serializeError(message));
+    socket.write(RESPV2Serializer.serializeError(message));
   };
   const socketWrite = (data: string) => {
     socket.write(data);
@@ -20,25 +20,12 @@ function serverListener(socket: net.Socket) {
     try {
       const parsedBuffer = RESPV2Parser.parse(buffer.toString());
 
-      if (parsedBuffer === undefined) {
-        const error = serializeError('Parser returns nothing. Please provide a valid RESPv2 data.');
-        socket.write(error);
-        return;
-      }
-
-      if (!Array.isArray(parsedBuffer)) {
-        const error = serializeError('Invalid data. Please provide a valid RESPv2 array.');
-        socket.write(error);
-        return;
-      }
+      if (parsedBuffer === undefined) return sendError('Parser returns nothing. Please provide a valid RESPv2 data.');
+      if (!Array.isArray(parsedBuffer)) return sendError('Invalid data. Please provide a valid RESPv2 array.');
+      if (typeof parsedBuffer[0] !== 'string') return sendError('Command should be a string.');
 
       const [operation, ...data] = parsedBuffer;
-
-      if (typeof operation === 'string') {
-        serverHandler.run(operation, data);
-      } else {
-        sendError('Command should be a string.');
-      }
+      serverHandler.run(operation, data);
     } catch (error) {
       console.error(error);
       if (error instanceof Error) sendError('ERROR: ' + error.message);

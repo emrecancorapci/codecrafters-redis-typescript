@@ -1,4 +1,4 @@
-import { serializeData, serializeError } from './resp-v2-serializer.ts';
+import RESPV2Serializer from './resp-v2-serializer.ts';
 import { DatabaseValue, DataType } from './types.ts';
 
 type ServerAction = (data: DataType[]) => void;
@@ -17,7 +17,7 @@ export default class ServerHandler {
   constructor({ database, socketWrite }: ConstructorProperties) {
     this.database = database;
     this.socketWrite = socketWrite;
-    this.sendError = (message: string) => socketWrite(serializeError(message));
+    this.sendError = (message: string) => socketWrite(RESPV2Serializer.serializeError(message));
   }
 
   private ping: ServerAction = (data: DataType[]) => {
@@ -28,7 +28,7 @@ export default class ServerHandler {
   };
 
   private echo: ServerAction = (data: DataType[]) => {
-    const response = serializeData(data.length === 1 ? data[0] : data);
+    const response = RESPV2Serializer.serializeData(data.length === 1 ? data[0] : data);
     this.socketWrite(response);
   };
 
@@ -78,7 +78,7 @@ export default class ServerHandler {
       return this.socketWrite('$-1\r\n');
     }
 
-    this.socketWrite(serializeData(databaseValue.value));
+    this.socketWrite(RESPV2Serializer.serializeData(databaseValue.value));
   };
 
   run: ServerRun = (command: string, data: DataType[]) => {
