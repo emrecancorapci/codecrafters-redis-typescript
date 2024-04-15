@@ -1,5 +1,5 @@
 import { serializeData, serializeError } from './resp-v2-serializer.ts';
-import { DataType } from './types.ts';
+import { DatabaseValue, DataType } from './types.ts';
 
 type ServerAction = (data: DataType[]) => void;
 
@@ -7,7 +7,7 @@ export default function ServerHandler({
   database,
   socketWrite,
 }: {
-  database: Map<string, DataType>;
+  database: Map<string, DatabaseValue>;
   socketWrite: (data: string) => void;
 }) {
   const sendError = (message: string) => socketWrite(serializeError(message));
@@ -25,17 +25,28 @@ export default function ServerHandler({
   };
 
   const set: ServerAction = (data: DataType[]) => {
-    if (data.length !== 2) return sendError('Invalid number of arguments to set command');
+    if (data.length < 2) return sendError('Invalid number of arguments to set command');
+    const [key, value, ...setArguments] = data;
 
-    const [key, value] = data;
     if (typeof key !== 'string') return sendError('Invalid key argument');
+    if (typeof value !== 'string' && typeof value !== 'number') return sendError('Invalid value argument');
 
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      sendError('Invalid value argument');
+    if (data.length === 2) {
+      database.set(key, { value, expires: -1 });
+      return socketWrite('+OK\r\n');
     }
 
-    database.set(key, value);
-    socketWrite('+OK\r\n');
+    if (data.length === 4) {
+      const [argument, argumentValue] = setArguments;
+
+      if (typeof argument !== 'string') return sendError('Invalid set argument');
+      if (argument.toLowerCase() === 'px' && typeof argumentValue === 'number' && argumentValue > 0) {
+        database.set(key, { value, expires: Date.now() + argumentValue });
+        return socketWrite('+OK\r\n');
+      }
+    }
+
+    return sendError('Invalid number of arguments to set command');
   };
 
   const get: ServerAction = (data: DataType[]) => {
@@ -44,10 +55,15 @@ export default function ServerHandler({
     const key = data[0];
     if (typeof key !== 'string') return sendError('Invalid key argument');
 
-    const value = database.get(key);
-    if (value === undefined) return socketWrite('$-1\r\n');
+    const databaseValue = database.get(key);
+    if (databaseValue === undefined) return socketWrite('$-1\r\n');
 
-    socketWrite(serializeData(value));
+    if (databaseValue.expires !== -1 && databaseValue.expires < Date.now()) {
+      database.delete(key);
+      return socketWrite('$-1\r\n');
+    }
+
+    socketWrite(serializeData(databaseValue.value));
   };
 
   const runServerCommand = (command: string, data: DataType[]) => {

@@ -3,10 +3,10 @@ import * as net from 'node:net';
 import { parseRespV2 } from './resp-v2-parser.ts';
 import { serializeError } from './resp-v2-serializer.ts';
 import ServerHandler from './server-handler.ts';
-import { DataType } from './types.ts';
+import { DatabaseValue } from './types.ts';
 
 function serverListener(socket: net.Socket) {
-  const database = new Map<string, DataType>();
+  const database = new Map<string, DatabaseValue>();
 
   const sendError = (message: string) => {
     socket.write(serializeError(message));
