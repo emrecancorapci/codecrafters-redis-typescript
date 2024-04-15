@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/switch-case-braces */
-import { echo, get, ping, set } from './commands/index.ts';
+import { echo, get, info, ping, set } from './commands/index.ts';
 import RESPV2Serializer from './resp-v2-serializer.ts';
 import { DatabaseValue, DataType, ServerAction, ServerDatabaseAction } from './types.ts';
 
@@ -31,6 +31,8 @@ export default class ServerHandler {
         return this.runCommand(data, this.useDatabase(set));
       case 'get':
         return this.runCommand(data, this.useDatabase(get));
+      case 'info':
+        return this.runCommand(data, info);
       default:
         return this.sendError('Unknown command');
     }
