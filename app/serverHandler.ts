@@ -1,5 +1,5 @@
-import { serializeData, serializeError } from "./resp-v2-serializer";
-import { DataType } from "./types";
+import { serializeData, serializeError } from "./resp-v2-serializer.ts";
+import { DataType } from "./types.ts";
 
 type ServerAction = (data: DataType[]) => void;
 

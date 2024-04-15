@@ -1,6 +1,6 @@
 import * as net from "node:net";
 import { parseRespV2 } from "./resp-v2-parser.ts";
-import { serializeError, serializeData } from "./resp-v2-serializer.ts";
+import { serializeError } from "./resp-v2-serializer.ts";
 import { DataType } from "./types.ts";
 import ServerHandler from "./serverHandler.ts";
 
