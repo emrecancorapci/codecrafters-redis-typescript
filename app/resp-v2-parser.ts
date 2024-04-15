@@ -1,6 +1,7 @@
-export function respV2Parser(buffer: string): DataType[] | DataType {
+import { DataType } from "./types.ts";
+
+export function parseRespV2(buffer: string): DataType[] | DataType {
   const data = buffer.toString().trim().split('\r\n');
-  console.log('Parsed data:', data);
   const valueOrArrayParser = getValueOrParser(data[0][0]);
 
   if ("data" in valueOrArrayParser) {
@@ -11,26 +12,6 @@ export function respV2Parser(buffer: string): DataType[] | DataType {
     return valueOrArrayParser(data);
   } else return;
 }
-
-export function respV2Unparser(data: DataType[] | DataType): string {
-  if (typeof data === 'number') {
-    return `:${data}\r\n`;
-  } else if (typeof data === 'string') {
-    return `+${data}\r\n`;
-  } else if (data === undefined) {
-    return '$-1\r\n';
-  } else if (Array.isArray(data)) {
-    if(data.length === 1) return respV2Unparser(data[0]);
-    return `*${data.length}\r\n${data.map(respV2Unparser).join('')}`;
-  }
-  throw new Error('Invalid data.');
-}
-
-export function respV2ErrorUnparser(data: string): string {
-  return `-${data}\r\n`;
-}
-
-type GetValueOrParser = { isBulk?: boolean, data?: DataType } | ((data: string[]) => DataType[] | undefined)
 
 function getValueOrParser(response: string): GetValueOrParser {
   switch (response[0]) {
@@ -87,4 +68,4 @@ function parseArray(data: string[]): DataType[] | undefined {
   return result;
 }
 
-type DataType = number | string | undefined;
+type GetValueOrParser = { isBulk?: boolean, data?: DataType } | ((data: string[]) => DataType[] | undefined)
