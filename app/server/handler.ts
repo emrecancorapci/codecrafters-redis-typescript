@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/switch-case-braces */
-import { echo, get, info, ping, set } from './commands/index.ts';
-import RESPV2Serializer from './resp-v2-serializer.ts';
-import { DatabaseValue, DataType, ServerAction, ServerDatabaseAction } from './types.ts';
+import { echo, get, info, ping, set } from '../commands/index.ts';
+import RESPV2Serializer from '../resp-v2-serializer.ts';
+import { DatabaseValue, DataType, ServerAction, ServerDatabaseAction } from '../types.ts';
 
 type CommandRunner = (command: string, data: DataType[]) => void;
 
