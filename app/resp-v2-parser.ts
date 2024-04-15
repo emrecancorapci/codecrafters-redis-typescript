@@ -20,6 +20,7 @@ export function respV2Unparser(data: DataType[] | DataType): string {
   } else if (data === undefined) {
     return '$-1\r\n';
   } else if (Array.isArray(data)) {
+    if(data.length === 1) return respV2Unparser(data[0]);
     return `*${data.length}\r\n${data.map(respV2Unparser).join('')}`;
   }
   throw new Error('Invalid data.');
