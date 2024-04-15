@@ -1,5 +1,4 @@
 import * as net from 'node:net';
-import { argv } from 'node:process';
 
 import RESPV2Parser from './resp-v2-parser.ts';
 import RESPV2Serializer from './resp-v2-serializer.ts';
@@ -34,7 +33,7 @@ function serverListener(socket: net.Socket) {
   });
 }
 
-const PORT = Number(argv[argv.findIndex((value) => value.toLowerCase() == '--port') + 1]) || 6379;
+const PORT = Number(process.argv[process.argv.findIndex((value) => value.toLowerCase() == '--port') + 1]) || 6379;
 
 const server: net.Server = net
   .createServer(serverListener)
