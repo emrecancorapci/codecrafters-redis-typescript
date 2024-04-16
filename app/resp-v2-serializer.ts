@@ -29,6 +29,12 @@ export default class RESPV2Serializer {
    * @param data - Array to be serialized
    * @returns String with the array preceded by an asterisk and followed by a CRLF
    */
+  public static serializeMultiBulk = (data: string[]) => this.serializeBulk(data.join('\r\n'));
+
+  /**
+   * @param data - Array to be serialized
+   * @returns String with the array preceded by an asterisk and followed by a CRLF
+   */
   public static serializeArray: (data: DataType[]) => string = (data: DataType[]) => {
     if (data.length === 0) return '*0\r\n';
     if (data.length === 1) return RESPV2Serializer.serializeData(data[0]);
