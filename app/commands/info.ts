@@ -7,14 +7,14 @@ const info: ServerAction = (data: DataType[]) => {
 
   if (data[0] === 'replication') {
     return masterInfo
-      ? {
+      ? { value: RESPV2Serializer.serializeBulk('role:slave') }
+      : {
           value: RESPV2Serializer.serializeMultiBulk([
-            'role:slave',
+            'role:master',
             'master_replid:' + crypto.randomUUID(),
             'master_repl_offset:' + '0',
           ]),
-        }
-      : { value: RESPV2Serializer.serializeBulk('role:master') };
+        };
   }
 
   return { error: 'Unknown INFO argument. Please provide a valid argument.' };
