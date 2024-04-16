@@ -12,7 +12,7 @@ if (master) {
   const client = new net.Socket();
 
   client.connect(master.port, master.host, () => {
-    client.write(RESPV2Serializer.serializeMultiBulk(['PING']));
+    client.write('*1\r\n$4\r\nping\r\n');
   });
 }
 
