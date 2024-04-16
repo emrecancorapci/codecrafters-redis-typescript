@@ -1,9 +1,8 @@
 import * as net from 'node:net';
 
-import RESPV2Serializer from './resp-v2-serializer.ts';
 import getPort from './server/arguments/get-port.ts';
 import getReplicaOf from './server/arguments/get-replicaof.ts';
-import serverListener from './server/listener.ts';
+import ServerListener from './server/server-listener.ts';
 
 const PORT = getPort();
 const master = getReplicaOf();
@@ -17,8 +16,12 @@ if (master) {
 }
 
 const server: net.Server = net
-  .createServer(serverListener)
-  .on('connection', (socket) => console.log(`New connection from`, socket.remoteAddress, socket.remotePort))
+  .createServer()
+  .on('connection', (socket) => {
+    const serverListener = new ServerListener(socket);
+    serverListener.listen();
+    console.log(`New connection from`, socket.remoteAddress, socket.remotePort);
+  })
   .on('error', (error) => console.error(error));
 
 server.listen(PORT, '127.0.0.1').on('listening', () => console.log(`Server listening on port ${PORT}`));
