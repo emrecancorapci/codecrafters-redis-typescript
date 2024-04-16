@@ -8,23 +8,28 @@ const set: ServerDatabaseAction = ({ data, database }: ServerDatabaseActionPrope
   if (typeof value !== 'string' && typeof value !== 'number')
     return { error: `Invalid VALUE for SET. Value: ${value}` };
 
-  if (data.length === 2) {
-    database.set(key, { value, expires: -1 });
-    return { value: '+OK\r\n' };
+  switch (data.length) {
+    case 2: {
+      database.set(key, { value, expires: -1 });
+      return { value: '+OK\r\n' };
+    }
+    case 4: {
+      const [argument, argumentValue] = setArguments;
+
+      if (typeof argument !== 'string' || argument.toLowerCase() !== 'px')
+        return { error: `Invalid ARGUMENT for SET. Argument: ${argument}` };
+
+      const expireDate = Number(argumentValue);
+      if (Number.isNaN(expireDate) || expireDate < 0)
+        return { error: `Invalid EXPIRE for SET. Expire: ${argumentValue}` };
+
+      database.set(key, { value, expires: Date.now() + expireDate });
+      return { value: '+OK\r\n' };
+    }
+    default: {
+      return { error: `Invalid number of ARGUMENTs for SET. Data: ${data.join(' ')}` };
+    }
   }
-
-  if (data.length !== 4) return { error: `Invalid number of ARGUMENTs for SET. Data: ${data.join(' ')}` };
-
-  const [argument, argumentValue] = setArguments;
-
-  if (typeof argument !== 'string' || argument.toLowerCase() !== 'px')
-    return { error: `Invalid ARGUMENT for SET. Argument: ${argument}` };
-
-  const expires = Number(argumentValue);
-  if (Number.isNaN(expires) || expires < 0) return { error: `Invalid EXPIRES for SET. Expires: ${argumentValue}` };
-
-  database.set(key, { value, expires: Date.now() + expires });
-  return { value: '+OK\r\n' };
 };
 
 export default set;

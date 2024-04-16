@@ -1,13 +1,13 @@
+import RESPV2Serializer from '../resp-v2-serializer.ts';
 import { DataType, ServerAction } from '../types.ts';
 
 const ping: ServerAction = (data: DataType[]) => {
-  let response = '+PONG\r\n';
+  const isPing = (item: DataType) => typeof item === 'string' && item.toLowerCase() === 'ping';
+  const serialPong = RESPV2Serializer.serializeString('PONG');
 
-  for (const object of data) {
-    if (typeof object === 'string' && object.toLowerCase() === 'ping') response += '+PONG\r\n';
-  }
+  const pingResponses = data.filter((item) => isPing(item)).map(() => serialPong);
 
-  return { value: response };
+  return { value: serialPong + pingResponses.join('') };
 };
 
 export default ping;
