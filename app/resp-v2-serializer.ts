@@ -3,36 +3,42 @@ import { DataType } from './types.ts';
 export default class RESPV2Serializer {
   /**
    * @param data - Number to be serialized
+   * @example 256 => :256\r\n
    * @returns String with the number preceded by a colon and followed by a CRLF
    */
   public static serializeNumber = (data: number) => `:${data}\r\n`;
 
   /**
    * @param data - String to be serialized
+   * @example 'PING' => +PING\r\n
    * @returns String with the string preceded by a plus sign and followed by a CRLF
    */
   public static serializeString = (data: string) => `+${data}\r\n`;
 
   /**
    * @param data - String to be serialized as an error
+   * @example 'ERR' => -ERR\r\n
    * @returns String with the string preceded by a minus sign and followed by a CRLF
    */
   public static serializeError = (data: string) => `-${data}\r\n`;
 
   /**
    * @param data - String to be serialized as a bulk
+   * @example 'PING' => $4\r\nPING\r\n
    * @returns String with the string preceded by a dollar sign and followed by a CRLF
    */
   public static serializeBulk = (data: string) => `$${data.length}\r\n${data}\r\n`;
 
   /**
    * @param data - Array to be serialized
+   * @example 'PING' => *1\r\n$4\r\nPING\r\n
    * @returns String with the array preceded by an asterisk and followed by a CRLF
    */
   public static serializeMultiBulk = (data: string[]) => this.serializeBulk(data.join('\r\n'));
 
   /**
    * @param data - Array to be serialized
+   * @example ['PING', 'PING'] => *2\r\n$4\r\nPING\r\n$4\r\nPING\r\n
    * @returns String with the array preceded by an asterisk and followed by a CRLF
    */
   public static serializeArray: (data: DataType[]) => string = (data: DataType[]) => {
