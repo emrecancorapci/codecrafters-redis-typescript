@@ -31,7 +31,7 @@ export default class RESPV2Serializer {
 
   /**
    * @param data - Array to be serialized
-   * @example 'PING' => *1\r\n$4\r\nPING\r\n
+   * @example ['PING'] => *1\r\n$4\r\nPING\r\n
    * @returns String with the array preceded by an asterisk and followed by a CRLF
    */
   public static serializeMultiBulk = (data: string[]) => this.serializeBulk(data.join('\r\n'));
