@@ -8,10 +8,10 @@ export default class MasterServerListener {
   private readonly host: string;
   private readonly port: number;
 
-  constructor(host: string, port: number) {
+  constructor(host: string, port: number, socket: net.Socket) {
     this.host = host;
     this.port = port;
-    this.socket = new net.Socket({ allowHalfOpen: true, readable: true, writable: true });
+    this.socket = socket;
     console.log(Date.now() + '| Master server listener created.');
   }
 
