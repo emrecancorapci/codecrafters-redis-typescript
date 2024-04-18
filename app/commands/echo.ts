@@ -1,8 +1,8 @@
-import RESPV2Serializer from '../resp-v2-serializer.ts';
-import { DataType, ServerAction } from '../types.ts';
+import RESPv2, { RESPv2Data } from '../protocols/resp-v2.ts';
+import { ServerAction } from '../server/types.ts';
 
-const echo: ServerAction = (data: DataType[]) => {
-  const response = RESPV2Serializer.serializeData(data.length === 1 ? data[0] : data);
+const echo: ServerAction<RESPv2Data> = (data: RESPv2Data[]) => {
+  const response = RESPv2.serializeData(data.length === 1 ? data[0] : data);
   return { value: response };
 };
 

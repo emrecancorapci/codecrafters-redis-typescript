@@ -1,27 +1,27 @@
 /* eslint-disable unicorn/switch-case-braces */
 import { echo, get, info, ping, set } from '../commands/index.ts';
-import RESPV2Serializer from '../resp-v2-serializer.ts';
-import { DatabaseValue, DataType, ServerAction, ServerDatabaseAction } from '../types.ts';
+import RESPv2, { RESPv2Data } from '../protocols/resp-v2.ts';
+import { DatabaseValue, ServerAction, ServerDatabaseAction } from './types.ts';
 
-type CommandRunner = (command: string, data: DataType[]) => void;
+type CommandRunner = (command: string, data: RESPv2Data[]) => void;
 
 interface ConstructorProperties {
-  database: Map<string, DatabaseValue>;
+  database: Map<string, DatabaseValue<RESPv2Data>>;
   socketWrite: (data: string) => void;
 }
 
 export default class ServerHandler {
   readonly socketWrite: (data: string) => void;
-  readonly database: Map<string, DatabaseValue>;
+  readonly database: Map<string, DatabaseValue<RESPv2Data>>;
   readonly sendError: (message: string) => void;
 
   constructor({ database, socketWrite }: ConstructorProperties) {
     this.database = database;
     this.socketWrite = socketWrite;
-    this.sendError = (message: string) => socketWrite(RESPV2Serializer.serializeError(message));
+    this.sendError = (message: string) => socketWrite(RESPv2.serializeError(message));
   }
 
-  public run: CommandRunner = (command: string, data: DataType[]) => {
+  public run: CommandRunner = (command: string, data: RESPv2Data[]) => {
     switch (command.toLowerCase()) {
       case 'ping':
         return this.runCommand(data, ping);
@@ -38,13 +38,14 @@ export default class ServerHandler {
     }
   };
 
-  private runCommand = (data: DataType[], fx: ServerAction) => {
+  private runCommand = (data: RESPv2Data[], fx: ServerAction<RESPv2Data>) => {
     const response = fx(data);
     if ('error' in response) return this.sendError(response.error);
     if ('value' in response) return this.socketWrite(response.value);
     throw new Error('Invalid ServerActionReturn type. Please provide a valid response type.');
   };
 
-  private useDatabase: (fx: ServerDatabaseAction) => ServerAction = (fx: ServerDatabaseAction) => (data: DataType[]) =>
-    fx({ data: data, database: this.database });
+  private useDatabase(fx: ServerDatabaseAction<RESPv2Data>): ServerAction<RESPv2Data> {
+    return (data: RESPv2Data[]) => fx({ data: data, database: this.database });
+  }
 }

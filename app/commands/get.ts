@@ -1,7 +1,7 @@
-import RESPV2Serializer from '../resp-v2-serializer.ts';
-import { ServerDatabaseAction, ServerDatabaseActionProperties } from '../types.ts';
+import RESPv2, { RESPv2Data } from '../protocols/resp-v2.ts';
+import { ServerDatabaseAction, ServerDatabaseActionProperties } from '../server/types.ts';
 
-const get: ServerDatabaseAction = ({ data, database }: ServerDatabaseActionProperties) => {
+const get: ServerDatabaseAction<RESPv2Data> = ({ data, database }: ServerDatabaseActionProperties<RESPv2Data>) => {
   if (data.length !== 1) return { error: `Invalid number of ARGUMENTs for GET. Data: ${data.join(' ')}` };
 
   const key = data[0];
@@ -15,7 +15,7 @@ const get: ServerDatabaseAction = ({ data, database }: ServerDatabaseActionPrope
     return { value: '$-1\r\n' };
   }
 
-  return { value: RESPV2Serializer.serializeData(databaseValue.value) };
+  return { value: RESPv2.serializeData(databaseValue.value) };
 };
 
 export default get;
