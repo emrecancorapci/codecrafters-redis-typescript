@@ -24,12 +24,16 @@ export default class ServerListener {
     });
 
     const master = getReplicaOf();
+    console.log(Date.now(), '| Master server:', master);
 
     if (master) this.masterListener = new MasterServerListener(master.host, master.port);
+    console.log(Date.now(), '| Server listener created.');
   }
 
   public listen(): void {
+    console.log(Date.now(), '| Starting to perform handshake.');
     if (this.masterListener) this.masterListener.performHandshake();
+    console.log(Date.now(), '| Handshake completed. Listening for incoming data.');
     this.socket.on('data', this.onSocketData.bind(this)).on('error', (error) => console.error(error));
   }
 

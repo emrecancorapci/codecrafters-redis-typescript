@@ -11,7 +11,8 @@ export default class MasterServerListener {
   constructor(host: string, port: number) {
     this.host = host;
     this.port = port;
-    this.socket = new net.Socket();
+    this.socket = new net.Socket({ allowHalfOpen: true, readable: true, writable: true });
+    console.log(Date.now() + '| Master server listener created.');
   }
 
   public performHandshake(): void {
@@ -33,6 +34,7 @@ export default class MasterServerListener {
       console.log(Date.now() + '| Received PONG response. Sending REPLICAOF request.');
       this.socket.write(RESPv2.serializeArray(['REPLICAOF', 'listening-port', this.port.toString()]));
       this.socket.write(RESPv2.serializeArray(['REPLICAOF', 'capa', 'psync2']));
+      console.log(Date.now() + '| REPLICAOF request sent. Waiting for response.');
     } else {
       return this.sendError('Invalid response from master');
     }
