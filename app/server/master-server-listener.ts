@@ -15,8 +15,11 @@ export default class MasterServerListener {
   }
 
   public performHandshake(): void {
+    console.log(Date.now() + '| Connecting to master server.');
     this.socket.connect(this.port, this.host, () => {
+      console.log(Date.now() + '| Connected to master server. Sending PING request.');
       this.socket.write(RESPv2.serializeArray(['PING']));
+      console.log(Date.now() + '|PING request sent. Waiting for response.');
       this.socket.on('data', this.onHandshakeData.bind(this));
     });
   }
@@ -26,9 +29,8 @@ export default class MasterServerListener {
     if ('error' in parsedBuffer) return this.sendError(parsedBuffer.error);
     const { operation } = parsedBuffer;
 
-    this.socket.write(RESPv2.serializeArray(['PING']));
-
     if (operation === 'PONG') {
+      console.log(Date.now() + '| Received PONG response. Sending REPLICAOF request.');
       this.socket.write(RESPv2.serializeArray(['REPLICAOF', 'listening-port', this.port.toString()]));
       this.socket.write(RESPv2.serializeArray(['REPLICAOF', 'capa', 'psync2']));
     } else {
