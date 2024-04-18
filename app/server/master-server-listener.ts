@@ -26,6 +26,8 @@ export default class MasterServerListener {
     if ('error' in parsedBuffer) return this.sendError(parsedBuffer.error);
     const { operation } = parsedBuffer;
 
+    this.socket.write(RESPv2.serializeArray(['PING']));
+
     if (operation === 'PONG') {
       this.socket.write(RESPv2.serializeArray(['REPLICAOF', 'listening-port', this.port.toString()]));
       this.socket.write(RESPv2.serializeArray(['REPLICAOF', 'capa', 'psync2']));
