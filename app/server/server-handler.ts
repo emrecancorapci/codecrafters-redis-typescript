@@ -26,8 +26,8 @@ export default class ServerHandler {
   }
 
   public run: CommandRunner = (command: string, data: RESPv2Data[]) => {
-    return this.commands.has(command)
-      ? this.commandRunner(data, this.commands.get(command) as ServerAction<RESPv2Data>)
+    return this.commands.has(command.toLowerCase())
+      ? this.commandRunner(data, this.commands.get(command.toLowerCase()) as ServerAction<RESPv2Data>)
       : this.sendError('Unknown command');
   };
 
