@@ -1,7 +1,7 @@
-import { RESPv2Data } from '../protocols/resp-v2.ts';
-import { ServerDatabaseAction, ServerDatabaseActionProperties } from '../server/types.ts';
+import { RESPv2Data } from '../../protocols/resp-v2.ts';
+import { DatabaseAction, DatabaseActionProperties } from '../types.ts';
 
-const set: ServerDatabaseAction<RESPv2Data> = ({ data, database }: ServerDatabaseActionProperties<RESPv2Data>) => {
+const set: DatabaseAction<RESPv2Data> = ({ data, database }: DatabaseActionProperties<RESPv2Data>) => {
   if (data.length < 2) return { error: `Not enough number of ARGUMENTs for SET. Data: ${data.join(' ')}` };
   const [key, value, ...setArguments] = data;
 

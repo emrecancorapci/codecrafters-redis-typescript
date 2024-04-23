@@ -1,8 +1,8 @@
-import RESPv2, { RESPv2Data } from '../protocols/resp-v2.ts';
-import getReplicaOf from '../server/arguments/get-replicaof.ts';
-import { ServerAction } from '../server/types.ts';
+import RESPv2, { RESPv2Data } from '../../protocols/resp-v2.ts';
+import getReplicaOf from '../arguments/get-replicaof.ts';
+import { ServerAction, ServerActionProperties } from '../types.ts';
 
-const info: ServerAction<RESPv2Data> = (data: RESPv2Data[]) => {
+const info: ServerAction<RESPv2Data> = ({ data }: ServerActionProperties<RESPv2Data>) => {
   const masterInfo = getReplicaOf();
 
   if (data[0] === 'replication') {
