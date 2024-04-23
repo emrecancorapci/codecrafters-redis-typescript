@@ -7,8 +7,6 @@ import { DatabaseAction, DatabaseValue, RoleAction, ServerAction, ServerActionPr
 type CommandRunner = (command: string, data: RESPv2Data[]) => void;
 
 export default class ServerHandler {
-  readonly sendError: (message: string) => void;
-
   commands: Map<string, ServerAction<RESPv2Data>> = new Map([
     ['ping', ping],
     ['echo', echo],
@@ -20,10 +18,10 @@ export default class ServerHandler {
 
   constructor(
     readonly database: Map<string, DatabaseValue<RESPv2Data>>,
-    readonly socketWrite: (data: string) => void
-  ) {
-    this.sendError = (message: string) => socketWrite(RESPv2.serializeError(message));
-  }
+    readonly socketWrite: (data: string) => void,
+    readonly master = getReplicaOf(),
+    readonly sendError = (message: string) => socketWrite(RESPv2.serializeError(message))
+  ) {}
 
   public run: CommandRunner = (command: string, data: RESPv2Data[]) => {
     return this.commands.has(command.toLowerCase())
@@ -44,8 +42,7 @@ export default class ServerHandler {
 
   private useRole(fx: RoleAction<RESPv2Data>): ServerAction<RESPv2Data> {
     return ({ data }: ServerActionProperties<RESPv2Data>) => {
-      const master = getReplicaOf();
-      return fx({ data, master });
+      return fx({ data, master: this.master });
     };
   }
 }

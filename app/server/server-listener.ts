@@ -7,20 +7,19 @@ import ServerHandler from './server-handler.ts';
 import { DatabaseValue } from './types.ts';
 
 export default class ServerListener {
-  private readonly database: Map<string, DatabaseValue<RESPv2Data>>;
-  private readonly socket: net.Socket;
-
   private readonly serverHandler: ServerHandler;
 
-  constructor(socket: net.Socket) {
-    this.database = new Map<string, DatabaseValue<RESPv2Data>>();
-    this.socket = socket;
-
+  constructor(
+    private readonly socket: net.Socket,
+    private readonly database: Map<string, DatabaseValue<RESPv2Data>> = new Map(),
+    private readonly master: { host: string; port: number } | undefined = getReplicaOf()
+  ) {
     this.serverHandler = new ServerHandler(this.database, (data: string) => socket.write(data));
-    const master = getReplicaOf();
-    if (master) {
-      this.socket.connect(master.port, master.host, () => {
+
+    if (this.master) {
+      this.socket.connect(this.master.port, this.master.host, () => {
         this.socket.write(RESPv2.serializeArray(['PING']));
+        console.log(Date.now(), '| Master PING sended.');
       });
     }
 

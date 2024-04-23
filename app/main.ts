@@ -6,11 +6,11 @@ import ServerListener from './server/server-listener.ts';
 const PORT = getPort();
 
 const server: net.Server = net
-  .createServer()
+  .createServer((socket) => {
+    return new ServerListener(socket).listen();
+  })
   .on('connection', (socket) => {
     console.log(`New connection from`, socket.remoteAddress, socket.remotePort);
-    const serverListener = new ServerListener(socket);
-    serverListener.listen();
   })
   .on('error', (error) => console.error(error));
 

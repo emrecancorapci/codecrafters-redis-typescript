@@ -7,9 +7,9 @@ const info: RoleAction<RESPv2Data> = ({ data, master }: RoleActionProperties<RES
 
   if (data[0].toString().toLowerCase() === 'replication') {
     return master
-      ? { value: RESPv2.serializeBulk('role:slave') }
+      ? { value: RESPv2.serializeArray(['role:slave']) }
       : {
-          value: RESPv2.serializeMultiBulk([
+          value: RESPv2.serializeArray([
             'role:master',
             'master_replid:' + crypto.randomUUID(),
             'master_repl_offset:' + '0',
