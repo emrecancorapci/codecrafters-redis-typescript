@@ -2,7 +2,7 @@
 import RESPv2, { RESPv2Data } from '../protocols/resp-v2.ts';
 import getReplicaOf from './arguments/get-replicaof.ts';
 import { echo, get, info, ping, pong, set } from './commands/index.ts';
-import { DatabaseAction, DatabaseValue, ServerAction, ServerActionProperties, SlaveAction } from './types.ts';
+import { DatabaseAction, DatabaseValue, RoleAction, ServerAction, ServerActionProperties } from './types.ts';
 
 type CommandRunner = (command: string, data: RESPv2Data[]) => void;
 
@@ -11,11 +11,11 @@ export default class ServerHandler {
 
   commands: Map<string, ServerAction<RESPv2Data>> = new Map([
     ['ping', ping],
-    ['info', info],
     ['echo', echo],
     ['set', this.useDatabase(set)],
     ['get', this.useDatabase(get)],
-    ['pong', this.useOnlySlave(pong)],
+    ['info', this.useRole(info)],
+    ['pong', this.useRole(pong)],
   ]);
 
   constructor(
@@ -42,7 +42,7 @@ export default class ServerHandler {
     return ({ data }: ServerActionProperties<RESPv2Data>) => fx({ data, database: this.database });
   }
 
-  private useOnlySlave(fx: SlaveAction<RESPv2Data>): ServerAction<RESPv2Data> {
+  private useRole(fx: RoleAction<RESPv2Data>): ServerAction<RESPv2Data> {
     return ({ data }: ServerActionProperties<RESPv2Data>) => {
       const master = getReplicaOf();
       if (!master) return { error: 'Operation not permitted' };

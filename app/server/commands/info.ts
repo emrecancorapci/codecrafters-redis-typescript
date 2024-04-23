@@ -1,12 +1,12 @@
 import RESPv2, { RESPv2Data } from '../../protocols/resp-v2.ts';
-import getReplicaOf from '../arguments/get-replicaof.ts';
-import { ServerAction, ServerActionProperties } from '../types.ts';
+import { RoleAction, RoleActionProperties } from '../types.ts';
 
-const info: ServerAction<RESPv2Data> = ({ data }: ServerActionProperties<RESPv2Data>) => {
-  const masterInfo = getReplicaOf();
+const info: RoleAction<RESPv2Data> = ({ data, master }: RoleActionProperties<RESPv2Data>) => {
+  if (data.length === 0) return { error: 'INFO command requires at least one argument.' };
+  if (data[0] === undefined) return { error: 'INFO command requires at least one argument.' };
 
-  if (data[0] === 'replication') {
-    return masterInfo
+  if (data[0].toString().toLowerCase() === 'replication') {
+    return master
       ? { value: RESPv2.serializeBulk('role:slave') }
       : {
           value: RESPv2.serializeMultiBulk([

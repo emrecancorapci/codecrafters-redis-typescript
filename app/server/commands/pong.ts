@@ -1,7 +1,7 @@
 import RESPv2, { RESPv2Data } from '../../protocols/resp-v2.ts';
-import { SlaveAction, SlaveActionProperties } from '../types.ts';
+import { RoleAction, RoleActionProperties } from '../types.ts';
 
-const pong: SlaveAction<RESPv2Data> = ({ master }: SlaveActionProperties<RESPv2Data>) => {
+const pong: RoleAction<RESPv2Data> = ({ master }: RoleActionProperties<RESPv2Data>) => {
   return {
     value: RESPv2.serializeArray([
       'REPLICAOF',
