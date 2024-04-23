@@ -9,7 +9,7 @@ const info: RoleAction<RESPv2Data> = ({ data, master }: RoleActionProperties<RES
     return master
       ? { value: RESPv2.serializeArray(['role:slave']) }
       : {
-          value: RESPv2.serializeArray([
+          value: RESPv2.serializeMultiBulk([
             'role:master',
             'master_replid:' + crypto.randomUUID(),
             'master_repl_offset:' + '0',
