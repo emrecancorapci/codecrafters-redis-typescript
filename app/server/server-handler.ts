@@ -45,7 +45,6 @@ export default class ServerHandler {
   private useRole(fx: RoleAction<RESPv2Data>): ServerAction<RESPv2Data> {
     return ({ data }: ServerActionProperties<RESPv2Data>) => {
       const master = getReplicaOf();
-      if (!master) return { error: 'Operation not permitted' };
       return fx({ data, master });
     };
   }

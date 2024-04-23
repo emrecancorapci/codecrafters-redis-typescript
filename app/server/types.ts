@@ -11,7 +11,7 @@ export interface DatabaseActionProperties<T> extends ServerActionProperties<T> {
   database: Map<string, DatabaseValue<T>>;
 }
 export interface RoleActionProperties<T> extends ServerActionProperties<T> {
-  master: { host: string; port: number };
+  master: { host: string; port: number } | undefined;
 }
 
 export type ServerActionReturn = { value: string } | { error: string };
