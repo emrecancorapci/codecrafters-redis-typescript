@@ -1,8 +1,9 @@
 import * as net from 'node:net';
 
 import RESPv2, { RESPv2Data } from '../protocols/resp-v2.ts';
-import ServerHandler from './handler.ts';
+import getReplicaOf from './arguments/get-replicaof.ts';
 import { parseBuffer } from './helpers/parse-buffer.ts';
+import ServerHandler from './server-handler.ts';
 import { DatabaseValue } from './types.ts';
 
 export default class ServerListener {
@@ -15,15 +16,18 @@ export default class ServerListener {
     this.database = new Map<string, DatabaseValue<RESPv2Data>>();
     this.socket = socket;
 
-    this.serverHandler = new ServerHandler({
-      database: this.database,
-      socketWrite: (data: string) => socket.write(data),
-    });
+    this.serverHandler = new ServerHandler(this.database, (data: string) => socket.write(data));
+    const master = getReplicaOf();
+    if (master) {
+      this.socket.connect(master.port, master.host, () => {
+        this.socket.write(RESPv2.serializeArray(['PING']));
+      });
+    }
+
     console.log(Date.now(), '| Server listener created.');
   }
 
   public listen(): void {
-    console.log(Date.now(), '| Handshake completed. Listening for incoming data.');
     this.socket.on('data', this.onSocketData.bind(this)).on('error', (error) => console.error(error));
   }
 
