@@ -2,8 +2,10 @@ export type RESPv2Data = number | string | undefined;
 
 export default class RESPv2 {
   public static parse(buffer: string): RESPv2Data[] | RESPv2Data {
-    // const data = buffer.toString().trim().split('\\r\\n').slice(0, -1); // For Development
-    const data = buffer.toString().trim().split('\r\n');
+    const data =
+      process.env.ENV_MODE === 'dev'
+        ? buffer.toString().trim().split('\\r\\n').slice(0, -1)
+        : buffer.toString().trim().split('\r\n');
 
     if (data[0] == undefined || data[0][0] == undefined)
       throw new Error(`Invalid data format. Parse request: ${data.join(' ')}`);

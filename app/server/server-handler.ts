@@ -31,8 +31,10 @@ export default class ServerHandler {
 
   private commandRunner = (data: RESPv2Data[], fx: ServerAction<RESPv2Data>) => {
     const response = fx({ data });
-    if ('error' in response) return this.sendError(response.error);
+
     if ('value' in response) return this.socketWrite(response.value);
+
+    if ('error' in response) return this.sendError(response.error);
     throw new Error('Invalid ServerActionReturn type. Please provide a valid response type.');
   };
 
